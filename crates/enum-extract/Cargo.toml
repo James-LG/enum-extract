@@ -1,5 +1,6 @@
 [package]
 name = "enum-extract"
+description = "A derive macro for extracting enum variants into their own types."
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

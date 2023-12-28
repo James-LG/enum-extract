@@ -1,5 +1,6 @@
 [package]
 name = "enum-extract-error"
+description = "A companion crate for `enum-extract` that exports an error type."
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
