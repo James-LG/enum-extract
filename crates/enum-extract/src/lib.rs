@@ -9,6 +9,25 @@
 //! Derive functions on an Enum for easily accessing individual items in the Enum.
 //! This crate is intended to be used with the [enum-extract-error](https://crates.io/crates/enum-extract-error) crate.
 //!
+//! # Summary
+//!
+//! This crate adds a `EnumExtract` derive macro that adds the following functions for each variant in your enum:
+//!
+//! 1. `is_[variant]`: Returns a bool indicated whether the actual variant matches the expected variant.
+//! 2. `as_[variant]`: Returns a Result with a reference to the data contained by the variant, or an error if the actual variant is not the expected variant type.
+//! 3. `as_[variant]_mut`: Like `as_[variant]` but returns a mutable reference.
+//! 4. `into_[variant]`: Like `as_[variant]` but consumes the value and returns an owned value instead of a reference.
+//! 5. `extract_as_[variant]`: Calls `as_[variant]` and returns the data or panics if there was an error.
+//! 6. `extract_as_[variant]_mut`: Calls `as_[variant]_mut` and returns the data or panics if there was an error.
+//! 7. `extract_into_[variant]`: Calls `into_[variant]` and returns the data or panics if there was an error.
+//!
+//! ## Notes on the `extract` functions
+//!
+//! These functions are slightly different from calling `as_[variant]().unwrap()` because they panic with the `Display` output of `EnumExtractError` rather than the `Debug` output.
+//!
+//! Since these functions can panic they are not recommended for production code.
+//! Their main use is in tests, in which they can simplify and flatten tests significantly.
+//!
 //! # Examples
 //!
 //! ## Unit Variants
