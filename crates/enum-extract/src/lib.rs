@@ -6,51 +6,13 @@ use syn::{parse_macro_input, DataEnum, DeriveInput};
 /// returns first the types to return, the match names, and then tokens to the field accesses
 fn unit_fields_return(
     variant_name: &syn::Ident,
-    err_type: &syn::Type,
-    err_type_with_generics: &syn::Type,
     (fn_is_variant, doc_is_variant): (&Ident, &str),
-    (fn_as_variant, doc_as_variant): (&Ident, &str),
-    (fn_into_variant, doc_into_variant): (&Ident, &str),
 ) -> TokenStream {
     quote!(
         #[doc = #doc_is_variant]
         #[inline]
         pub fn #fn_is_variant(&self) -> bool {
             matches!(self, Self::#variant_name)
-        }
-
-        #[doc = #doc_as_variant ]
-        #[inline]
-        pub fn #fn_as_variant(&self) -> ::core::result::Result<&(), #err_type_with_generics> {
-            match self {
-                Self::#variant_name => {
-                    ::core::result::Result::Ok(&())
-                }
-                _ => {
-                    ::core::result::Result::Err(#err_type::new(
-                        stringify!(#variant_name),
-                        self.variant_name(),
-                        ::core::option::Option::None,
-                    ))
-                }
-            }
-        }
-
-        #[doc = #doc_into_variant ]
-        #[inline]
-        pub fn #fn_into_variant(self) -> ::core::result::Result<(), #err_type_with_generics> {
-            match self {
-                Self::#variant_name => {
-                    ::core::result::Result::Ok(())
-                }
-                _ => {
-                    ::core::result::Result::Err(#err_type::new(
-                        stringify!(#variant_name),
-                        self.variant_name(),
-                        ::core::option::Option::Some(self),
-                    ))
-                }
-            }
         }
     )
 }
@@ -62,9 +24,12 @@ fn unnamed_fields_return(
     err_type: &syn::Type,
     err_type_with_generics: &syn::Type,
     (fn_is_variant, doc_is_variant): (&Ident, &str),
-    (fn_as_mut_variant, doc_as_mut_variant): (&Ident, &str),
+    (fn_as_variant_mut, doc_as_variant_mut): (&Ident, &str),
     (fn_as_variant, doc_as_variant): (&Ident, &str),
     (fn_into_variant, doc_into_variant): (&Ident, &str),
+    (fn_extract_as_mut_variant, doc_extract_as_mut_variant): (&Ident, &str),
+    (fn_extract_as_variant, doc_extract_as_variant): (&Ident, &str),
+    (fn_extract_into_variant, doc_extract_into_variant): (&Ident, &str),
     fields: &syn::FieldsUnnamed,
 ) -> TokenStream {
     let (returns_mut_ref, returns_ref, returns_val, matches) = match fields.unnamed.len() {
@@ -112,9 +77,9 @@ fn unnamed_fields_return(
             matches!(self, Self::#variant_name(#matches))
         }
 
-        #[doc = #doc_as_mut_variant ]
+        #[doc = #doc_as_variant_mut ]
         #[inline]
-        pub fn #fn_as_mut_variant(&mut self) -> ::core::result::Result<#returns_mut_ref, #err_type_with_generics> {
+        pub fn #fn_as_variant_mut(&mut self) -> ::core::result::Result<#returns_mut_ref, #err_type_with_generics> {
             match self {
                 Self::#variant_name(#matches) => {
                     ::core::result::Result::Ok((#matches))
@@ -162,6 +127,24 @@ fn unnamed_fields_return(
                 }
             }
         }
+
+        #[doc = #doc_extract_as_mut_variant ]
+        #[inline]
+        pub fn #fn_extract_as_mut_variant(&mut self) -> #returns_mut_ref {
+            self.#fn_as_variant_mut().unwrap_or_else(|err| panic!("{}", err.to_string()))
+        }
+
+        #[doc = #doc_extract_as_variant ]
+        #[inline]
+        pub fn #fn_extract_as_variant(&self) -> #returns_ref {
+            self.#fn_as_variant().unwrap_or_else(|err| panic!("{}", err.to_string()))
+        }
+
+        #[doc = #doc_extract_into_variant ]
+        #[inline]
+        pub fn #fn_extract_into_variant(self) -> #returns_val {
+            self.#fn_into_variant().unwrap_or_else(|err| panic!("{}", err.to_string()))
+        }
     )
 }
 
@@ -171,10 +154,13 @@ fn named_fields_return(
     variant_name: &syn::Ident,
     err_type: &syn::Type,
     err_type_with_generics: &syn::Type,
-    (function_name_is, doc_is): (&Ident, &str),
-    (function_name_mut_ref, doc_mut_ref): (&Ident, &str),
-    (function_name_ref, doc_ref): (&Ident, &str),
-    (function_name_val, doc_val): (&Ident, &str),
+    (fn_is_variant, doc_is_variant): (&Ident, &str),
+    (fn_as_variant_mut, doc_as_variant_mut): (&Ident, &str),
+    (fn_as_variant, doc_as_variant): (&Ident, &str),
+    (fn_into_variant, doc_into_variant): (&Ident, &str),
+    (fn_extract_as_variant_mut, doc_extract_as_variant_mut): (&Ident, &str),
+    (fn_extract_as_variant, doc_extract_as_variant): (&Ident, &str),
+    (fn_extract_into_variant, doc_extract_into_variant): (&Ident, &str),
     fields: &syn::FieldsNamed,
 ) -> TokenStream {
     let (returns_mut_ref, returns_ref, returns_val, matches) = match fields.named.len() {
@@ -217,16 +203,16 @@ fn named_fields_return(
     };
 
     quote!(
-        #[doc = #doc_is ]
+        #[doc = #doc_is_variant ]
         #[inline]
         #[allow(unused_variables)]
-        pub fn #function_name_is(&self) -> bool {
+        pub fn #fn_is_variant(&self) -> bool {
             matches!(self, Self::#variant_name{ #matches })
         }
 
-        #[doc = #doc_mut_ref ]
+        #[doc = #doc_as_variant_mut ]
         #[inline]
-        pub fn #function_name_mut_ref(&mut self) -> ::core::result::Result<#returns_mut_ref, #err_type_with_generics> {
+        pub fn #fn_as_variant_mut(&mut self) -> ::core::result::Result<#returns_mut_ref, #err_type_with_generics> {
             match self {
                 Self::#variant_name{ #matches } => {
                     ::core::result::Result::Ok((#matches))
@@ -241,9 +227,9 @@ fn named_fields_return(
             }
         }
 
-        #[doc = #doc_ref ]
+        #[doc = #doc_as_variant ]
         #[inline]
-        pub fn #function_name_ref(&self) -> ::core::result::Result<#returns_ref, #err_type_with_generics> {
+        pub fn #fn_as_variant(&self) -> ::core::result::Result<#returns_ref, #err_type_with_generics> {
             match self {
                 Self::#variant_name{ #matches } => {
                     ::core::result::Result::Ok((#matches))
@@ -258,9 +244,9 @@ fn named_fields_return(
             }
         }
 
-        #[doc = #doc_val ]
+        #[doc = #doc_into_variant ]
         #[inline]
-        pub fn #function_name_val(self) -> ::core::result::Result<#returns_val, #err_type_with_generics> {
+        pub fn #fn_into_variant(self) -> ::core::result::Result<#returns_val, #err_type_with_generics> {
             match self {
                 Self::#variant_name{ #matches } => {
                     ::core::result::Result::Ok((#matches))
@@ -273,6 +259,24 @@ fn named_fields_return(
                     ))
                 }
             }
+        }
+
+        #[doc = #doc_extract_as_variant_mut ]
+        #[inline]
+        pub fn #fn_extract_as_variant_mut(&mut self) -> #returns_mut_ref {
+            self.#fn_as_variant_mut().unwrap_or_else(|err| panic!("{}", err.to_string()))
+        }
+
+        #[doc = #doc_extract_as_variant ]
+        #[inline]
+        pub fn #fn_extract_as_variant(&self) -> #returns_ref {
+            self.#fn_as_variant().unwrap_or_else(|err| panic!("{}", err.to_string()))
+        }
+
+        #[doc = #doc_extract_into_variant ]
+        #[inline]
+        pub fn #fn_extract_into_variant(self) -> #returns_val {
+            self.#fn_into_variant().unwrap_or_else(|err| panic!("{}", err.to_string()))
         }
     )
 }
@@ -360,6 +364,15 @@ fn impl_all_as_fns(name: &Ident, generics: &syn::Generics, data: &DataEnum) -> T
     for variant_data in &data.variants {
         let variant_name = &variant_data.ident;
 
+        let fn_is_variant = Ident::new(
+            &format!("is_{}", variant_name).to_snake_case(),
+            Span::call_site(),
+        );
+        let doc_is_variant = format!(
+            "Returns true if this is a `{}::{}`, otherwise false",
+            name, variant_name,
+        );
+
         let fn_as_variant = Ident::new(
             &format!("as_{}", variant_name).to_snake_case(),
             Span::call_site(),
@@ -368,6 +381,16 @@ fn impl_all_as_fns(name: &Ident, generics: &syn::Generics, data: &DataEnum) -> T
             "Returns references to the inner fields if this is a `{}::{}`, otherwise an `{}`",
             name, variant_name, "EnumExtractError",
         );
+
+        let fn_extract_as_variant = Ident::new(
+            &format!("extract_as_{}", variant_name).to_snake_case(),
+            Span::call_site(),
+        );
+        let doc_extract_as_variant = format!(
+            "Returns references to the inner fields if this is a `{}::{}`, otherwise panics.",
+            name, variant_name,
+        );
+
         let fn_as_variant_mut = Ident::new(
             &format!("as_{}_mut", variant_name).to_snake_case(),
             Span::call_site(),
@@ -379,34 +402,38 @@ fn impl_all_as_fns(name: &Ident, generics: &syn::Generics, data: &DataEnum) -> T
             "EnumExtractError",
         );
 
+        let fn_extract_as_variant_mut = Ident::new(
+            &format!("extract_as_{}_mut", variant_name).to_snake_case(),
+            Span::call_site(),
+        );
+        let doc_extract_as_variant_mut = format!(
+            "Returns mutable references to the inner fields if this is a `{}::{}`, otherwise panics.",
+            name,
+            variant_name,
+        );
+
         let fn_into_variant = Ident::new(
             &format!("into_{}", variant_name).to_snake_case(),
             Span::call_site(),
         );
         let doc_into_variant = format!(
-            "Returns the inner fields if this is a `{}::{}`, otherwise returns back the enum in the `Err` case of the result",
-            name,
-            variant_name,
+            "Returns the inner fields if this is a `{}::{}`, otherwise otherwise an `{}`",
+            name, variant_name, "EnumExtractError",
         );
 
-        let fn_is_variant = Ident::new(
-            &format!("is_{}", variant_name).to_snake_case(),
+        let fn_extract_into_variant = Ident::new(
+            &format!("extract_into_{}", variant_name).to_snake_case(),
             Span::call_site(),
         );
-        let doc_is_variant = format!(
-            "Returns true if this is a `{}::{}`, otherwise false",
+        let doc_extract_into_variant = format!(
+            "Returns the inner fields if this is a `{}::{}`, otherwise panics",
             name, variant_name,
         );
 
         let tokens = match &variant_data.fields {
-            syn::Fields::Unit => unit_fields_return(
-                variant_name,
-                &err_type,
-                &err_type_with_generics,
-                (&fn_is_variant, &doc_is_variant),
-                (&fn_as_variant, &doc_as_variant),
-                (&fn_into_variant, &doc_into_variant),
-            ),
+            syn::Fields::Unit => {
+                unit_fields_return(variant_name, (&fn_is_variant, &doc_is_variant))
+            }
             syn::Fields::Unnamed(unnamed) => unnamed_fields_return(
                 variant_name,
                 &err_type,
@@ -415,6 +442,9 @@ fn impl_all_as_fns(name: &Ident, generics: &syn::Generics, data: &DataEnum) -> T
                 (&fn_as_variant_mut, &doc_as_variant_mut),
                 (&fn_as_variant, &doc_as_variant),
                 (&fn_into_variant, &doc_into_variant),
+                (&fn_extract_as_variant_mut, &doc_extract_as_variant_mut),
+                (&fn_extract_as_variant, &doc_extract_as_variant),
+                (&fn_extract_into_variant, &doc_extract_into_variant),
                 unnamed,
             ),
             syn::Fields::Named(named) => named_fields_return(
@@ -425,6 +455,9 @@ fn impl_all_as_fns(name: &Ident, generics: &syn::Generics, data: &DataEnum) -> T
                 (&fn_as_variant_mut, &doc_as_variant_mut),
                 (&fn_as_variant, &doc_as_variant),
                 (&fn_into_variant, &doc_into_variant),
+                (&fn_extract_as_variant_mut, &doc_extract_as_variant_mut),
+                (&fn_extract_as_variant, &doc_extract_as_variant),
+                (&fn_extract_into_variant, &doc_extract_into_variant),
                 named,
             ),
         };

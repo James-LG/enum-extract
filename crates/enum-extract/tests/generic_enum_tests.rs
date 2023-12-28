@@ -14,7 +14,7 @@ use name_collisions::*;
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, EnumExtract)]
-enum WithGenerics<T: Clone + Copy> {
+enum WithGenerics<T: Clone + Copy + std::fmt::Debug> {
     A(T),
     B(T),
 }

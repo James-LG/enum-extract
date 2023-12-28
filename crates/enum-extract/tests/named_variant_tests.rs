@@ -103,3 +103,75 @@ fn error_should_contain_expected_and_actual() {
     assert_eq!(error.value, ::core::option::Option::Some(many));
     assert_eq!(error.to_string(), "expected One, got Three");
 }
+
+#[test]
+fn extract_as_should_not_panic_when_expected_variant_matches_actual() {
+    let many = ManyVariants::Three {
+        one: true,
+        two: 1,
+        three: 2,
+    };
+
+    assert_eq!(many.extract_as_three(), (&true, &1_u32, &2_i64));
+}
+
+#[test]
+#[should_panic(expected = "expected One, got Three")]
+fn extract_as_should_panic_when_expected_variant_does_not_match_actual() {
+    let many = ManyVariants::Three {
+        one: true,
+        two: 1,
+        three: 2,
+    };
+
+    many.extract_as_one();
+}
+
+#[test]
+fn extract_as_mut_should_not_panic_when_expected_variant_matches_actual() {
+    let mut many = ManyVariants::Three {
+        one: true,
+        two: 1,
+        three: 2,
+    };
+
+    assert_eq!(
+        many.extract_as_three_mut(),
+        (&mut true, &mut 1_u32, &mut 2_i64)
+    );
+}
+
+#[test]
+#[should_panic(expected = "expected One, got Three")]
+fn extract_as_mut_should_panic_when_expected_variant_does_not_match_actual() {
+    let mut many = ManyVariants::Three {
+        one: true,
+        two: 1,
+        three: 2,
+    };
+
+    many.extract_as_one_mut();
+}
+
+#[test]
+fn extract_into_should_not_panic_when_expected_variant_matches_actual() {
+    let many = ManyVariants::Three {
+        one: true,
+        two: 1,
+        three: 2,
+    };
+
+    assert_eq!(many.extract_into_three(), (true, 1_u32, 2_i64));
+}
+
+#[test]
+#[should_panic(expected = "expected One, got Three")]
+fn extract_into_should_panic_when_expected_variant_does_not_match_actual() {
+    let many = ManyVariants::Three {
+        one: true,
+        two: 1,
+        three: 2,
+    };
+
+    many.extract_into_one();
+}
