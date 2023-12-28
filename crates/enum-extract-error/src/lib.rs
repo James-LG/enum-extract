@@ -1,7 +1,7 @@
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-#[error("expected {expected}, found {actual}")]
+#[error("expected {expected}, got {actual}")]
 pub struct EnumExtractError<T> {
     pub expected: &'static str,
     pub actual: &'static str,

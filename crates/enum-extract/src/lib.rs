@@ -302,11 +302,30 @@ fn impl_all_as_fns(name: &Ident, generics: &syn::Generics, data: &DataEnum) -> T
         let inner_type_segment = inner_type_path.segments.last_mut().unwrap();
         let mut generic_args = syn::punctuated::Punctuated::new();
         for param in generics.params.iter() {
-            if let syn::GenericParam::Type(type_param) = param {
-                generic_args.push(syn::GenericArgument::Type(syn::Type::Path(syn::TypePath {
-                    qself: None,
-                    path: syn::Path::from(syn::PathSegment::from(type_param.ident.clone())),
-                })));
+            match param {
+                syn::GenericParam::Lifetime(lifetime_param) => {
+                    generic_args.push(syn::GenericArgument::Lifetime(syn::Lifetime::new(
+                        &format!("'{}", lifetime_param.lifetime.ident),
+                        Span::call_site(),
+                    )));
+                }
+                syn::GenericParam::Const(const_param) => {
+                    generic_args.push(syn::GenericArgument::Const(syn::Expr::Path(
+                        syn::ExprPath {
+                            attrs: vec![],
+                            qself: None,
+                            path: syn::Path::from(syn::PathSegment::from(
+                                const_param.ident.clone(),
+                            )),
+                        },
+                    )));
+                }
+                syn::GenericParam::Type(type_param) => {
+                    generic_args.push(syn::GenericArgument::Type(syn::Type::Path(syn::TypePath {
+                        qself: None,
+                        path: syn::Path::from(syn::PathSegment::from(type_param.ident.clone())),
+                    })));
+                }
             }
         }
         inner_type_segment.arguments =

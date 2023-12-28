@@ -94,4 +94,5 @@ fn error_should_contain_expected_and_actual() {
     assert_eq!(error.expected, "One");
     assert_eq!(error.actual, "Three");
     assert_eq!(error.value, ::core::option::Option::Some(many));
+    assert_eq!(error.to_string(), "expected One, got Three");
 }
