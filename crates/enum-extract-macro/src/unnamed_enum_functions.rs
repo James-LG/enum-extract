@@ -8,14 +8,16 @@ pub fn all_unnamed_functions(
     enum_name: &Ident,
     variant_name: &Ident,
     err_type: &Type,
-    err_type_with_generics: &Type,
+    err_value_type: &Type,
+    err_value_type_with_generics: &Type,
     fields: &FieldsUnnamed,
 ) -> TokenStream {
     let context = UnnamedEnumFunctionContext::new(
         enum_name,
         variant_name,
         err_type,
-        err_type_with_generics,
+        err_value_type,
+        err_value_type_with_generics,
         fields,
     );
 
@@ -39,7 +41,8 @@ struct UnnamedEnumFunctionContext<'a> {
     pub returns_mut_ref: TokenStream,
     pub returns_val: TokenStream,
     pub err_type: &'a syn::Type,
-    pub err_type_with_generics: &'a syn::Type,
+    pub err_value_type: &'a syn::Type,
+    pub err_value_type_with_generics: &'a syn::Type,
 }
 
 impl<'a> UnnamedEnumFunctionContext<'a> {
@@ -47,7 +50,8 @@ impl<'a> UnnamedEnumFunctionContext<'a> {
         enum_name: &'a Ident,
         variant_name: &'a Ident,
         err_type: &'a syn::Type,
-        err_type_with_generics: &'a syn::Type,
+        err_value_type: &'a syn::Type,
+        err_value_type_with_generics: &'a syn::Type,
         fields: &'a syn::FieldsUnnamed,
     ) -> Self {
         let (returns_mut_ref, returns_ref, returns_val, matches) = match fields.unnamed.len() {
@@ -95,7 +99,8 @@ impl<'a> UnnamedEnumFunctionContext<'a> {
             returns_mut_ref,
             returns_val,
             err_type,
-            err_type_with_generics,
+            err_value_type,
+            err_value_type_with_generics,
         }
     }
 }
@@ -123,13 +128,12 @@ fn unnamed_enum_as_variant(context: &UnnamedEnumFunctionContext) -> TokenStream 
     let variant_name = context.variant_name;
     let matches = &context.matches;
     let returns_ref = &context.returns_ref;
-    let err_type_with_generics = context.err_type_with_generics;
     let err_type = context.err_type;
 
     quote!(
         #[doc = #docs ]
         #[inline]
-        pub fn #function_name(&self) -> ::core::result::Result<#returns_ref, #err_type_with_generics> {
+        pub fn #function_name(&self) -> ::core::result::Result<#returns_ref, #err_type> {
             match self {
                 Self::#variant_name(#matches) => {
                     ::core::result::Result::Ok((#matches))
@@ -138,7 +142,6 @@ fn unnamed_enum_as_variant(context: &UnnamedEnumFunctionContext) -> TokenStream 
                     ::core::result::Result::Err(#err_type::new(
                         stringify!(#variant_name),
                         self.variant_name(),
-                        ::core::option::Option::None,
                     ))
                 }
             }
@@ -153,13 +156,12 @@ fn unnamed_enum_as_variant_mut(context: &UnnamedEnumFunctionContext) -> TokenStr
     let variant_name = context.variant_name;
     let matches = &context.matches;
     let returns_mut_ref = &context.returns_mut_ref;
-    let err_type_with_generics = context.err_type_with_generics;
     let err_type = context.err_type;
 
     quote!(
         #[doc = #docs ]
         #[inline]
-        pub fn #function_name(&mut self) -> ::core::result::Result<#returns_mut_ref, #err_type_with_generics> {
+        pub fn #function_name(&mut self) -> ::core::result::Result<#returns_mut_ref, #err_type> {
             match self {
                 Self::#variant_name(#matches) => {
                     ::core::result::Result::Ok((#matches))
@@ -168,7 +170,6 @@ fn unnamed_enum_as_variant_mut(context: &UnnamedEnumFunctionContext) -> TokenStr
                     ::core::result::Result::Err(#err_type::new(
                         stringify!(#variant_name),
                         self.variant_name(),
-                        ::core::option::Option::None,
                     ))
                 }
             }
@@ -183,8 +184,8 @@ fn unnamed_enum_into_variant(context: &UnnamedEnumFunctionContext) -> TokenStrea
     let variant_name = context.variant_name;
     let matches = &context.matches;
     let returns_val = &context.returns_val;
-    let err_type_with_generics = context.err_type_with_generics;
-    let err_type = context.err_type;
+    let err_type_with_generics = context.err_value_type_with_generics;
+    let err_type = context.err_value_type;
 
     quote!(
         #[doc = #docs ]
@@ -198,7 +199,7 @@ fn unnamed_enum_into_variant(context: &UnnamedEnumFunctionContext) -> TokenStrea
                     ::core::result::Result::Err(#err_type::new(
                         stringify!(#variant_name),
                         self.variant_name(),
-                        ::core::option::Option::Some(self),
+                        self,
                     ))
                 }
             }

@@ -100,9 +100,9 @@ fn error_should_contain_expected_and_actual() {
 
     let error = many.into_one().unwrap_err();
 
-    assert_eq!(error.expected, "One");
-    assert_eq!(error.actual, "Three");
-    assert_eq!(error.value, ::core::option::Option::Some(many));
+    assert_eq!(error.source.expected, "One");
+    assert_eq!(error.source.actual, "Three");
+    assert_eq!(error.value, many);
     assert_eq!(error.to_string(), "expected One, got Three");
 }
 

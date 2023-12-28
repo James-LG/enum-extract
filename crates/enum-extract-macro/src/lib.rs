@@ -77,7 +77,7 @@
 //!     Two(u32, i32),
 //! }
 //!
-//! fn main() -> Result<(), enum_extract_error::EnumExtractError<UnnamedVariants>> {
+//! fn main() -> Result<(), enum_extract_error::EnumExtractError> {
 //!     let mut unnamed = UnnamedVariants::One(1);
 //!
 //!     // returns a reference to the value
@@ -107,7 +107,7 @@
 //!     Two(u32, i32),
 //! }
 //!
-//! fn main() -> Result<(), enum_extract_error::EnumExtractError<UnnamedVariants>> {
+//! fn main() -> Result<(), enum_extract_error::EnumExtractError> {
 //!     let mut unnamed = UnnamedVariants::Two(1, 2);
 //!
 //!     // returns a reference to the value
@@ -209,7 +209,7 @@
 //!     },
 //! }
 //!
-//! fn main() -> Result<(), enum_extract_error::EnumExtractError<NamedVariants>> {
+//! fn main() -> Result<(), enum_extract_error::EnumExtractError> {
 //!     let mut named = NamedVariants::One { first: 1 };
 //!
 //!     // returns a reference to the value
@@ -244,7 +244,7 @@
 //!     },
 //! }
 //!
-//! fn main() -> Result<(), enum_extract_error::EnumExtractError<NamedVariants>> {
+//! fn main() -> Result<(), enum_extract_error::EnumExtractError> {
 //!     let mut unnamed = NamedVariants::Two { first: 1, second: 2 };
 //!
 //!     // returns a reference to the value
@@ -357,14 +357,17 @@ pub fn enum_extract(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 fn impl_all_as_fns(enum_name: &Ident, generics: &syn::Generics, data: &DataEnum) -> TokenStream {
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
-    let err_name = syn::Ident::new("EnumExtractError", Span::call_site());
     let err_path = syn::Path::from(syn::PathSegment::from(syn::Ident::new(
         "enum_extract_error",
         Span::call_site(),
     )));
+    let err_name = syn::Ident::new("EnumExtractError", Span::call_site());
     let err_type = get_error_type(&err_name, &err_path);
-    let err_type_with_generics =
-        get_error_type_with_generics(err_name, err_path, enum_name, generics);
+
+    let err_value_name = syn::Ident::new("EnumExtractValueError", Span::call_site());
+    let err_value_type = get_error_type(&err_value_name, &err_path);
+    let err_value_type_with_generics =
+        get_error_type_with_generics(err_value_name, err_path, enum_name, generics);
 
     let mut stream = TokenStream::new();
     let mut variant_names = TokenStream::new();
@@ -377,14 +380,16 @@ fn impl_all_as_fns(enum_name: &Ident, generics: &syn::Generics, data: &DataEnum)
                 enum_name,
                 variant_name,
                 &err_type,
-                &err_type_with_generics,
+                &err_value_type,
+                &err_value_type_with_generics,
                 unnamed,
             ),
             syn::Fields::Named(named) => named_enum_functions::all_named_functions(
                 enum_name,
                 variant_name,
                 &err_type,
-                &err_type_with_generics,
+                &err_value_type,
+                &err_value_type_with_generics,
                 named,
             ),
         };
