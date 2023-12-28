@@ -1,3 +1,297 @@
+//! Derive functions on an Enum for easily accessing individual items in the Enum.
+//! This crate is intended to be used with the [enum-extract-error](https://crates.io/crates/enum-extract-error) crate.
+//!
+//! # Examples
+//!
+//! ## Unit Variants
+//!
+//! Check if the variant is the expected variant:
+//!
+//! ```rust
+//! use enum_extract::EnumExtract;
+//!
+//! #[derive(Debug, EnumExtract)]
+//! enum UnitVariants {
+//!     One,
+//!     Two,
+//! }
+//!
+//! let unit = UnitVariants::One;
+//! assert!(unit.is_one());
+//! assert!(!unit.is_two());
+//! ```
+//!
+//! ## Unnamed Variants
+//!
+//! Check if the variant is the expected variant:
+//!
+//! ```rust
+//! use enum_extract::EnumExtract;
+//!
+//! #[derive(Debug, EnumExtract)]
+//! enum UnnamedVariants {
+//!     One(u32),
+//!     Two(u32, i32),
+//! }
+//!
+//! let unnamed = UnnamedVariants::One(1);
+//! assert!(unnamed.is_one());
+//! assert!(!unnamed.is_two());
+//! ```
+//!
+//! Get the variant's value:
+//!
+//! ```rust
+//! use enum_extract::EnumExtract;
+//!
+//! #[derive(Debug, EnumExtract)]
+//! enum UnnamedVariants {
+//!     One(u32),
+//!     Two(u32, i32),
+//! }
+//!
+//! fn main() -> Result<(), enum_extract_error::EnumExtractError<UnnamedVariants>> {
+//!     let mut unnamed = UnnamedVariants::One(1);
+//!
+//!     // returns a reference to the value
+//!     let one = unnamed.as_one()?;
+//!     assert_eq!(*one, 1);
+//!
+//!     // returns a mutable reference to the value
+//!     let one = unnamed.as_one_mut()?;
+//!     assert_eq!(*one, 1);
+//!
+//!     // returns the value by consuming the enum
+//!     let one = unnamed.into_one()?;
+//!     assert_eq!(one, 1);
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! If the variant has multiple values, a tuple will be returned:
+//!
+//! ```rust
+//! use enum_extract::EnumExtract;
+//!
+//! #[derive(Debug, EnumExtract)]
+//! enum UnnamedVariants {
+//!     One(u32),
+//!     Two(u32, i32),
+//! }
+//!
+//! fn main() -> Result<(), enum_extract_error::EnumExtractError<UnnamedVariants>> {
+//!     let mut unnamed = UnnamedVariants::Two(1, 2);
+//!
+//!     // returns a reference to the value
+//!     let two = unnamed.as_two()?;
+//!     assert_eq!(two, (&1, &2));
+//!
+//!     // returns a mutable reference to the value
+//!     let two = unnamed.as_two_mut()?;
+//!     assert_eq!(two, (&mut 1, &mut 2));
+//!
+//!     // returns the value by consuming the enum
+//!     let two = unnamed.into_two()?;
+//!     assert_eq!(two, (1, 2));
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! Extract variants of all of the above methods will panic with a decent message if the variant is not the expected variant.
+//! Very useful for testing, but not recommended for production code.
+//!
+//! See the [enum-extract-error](https://crates.io/crates/enum-extract-error) crate for more information on the error type.
+//!
+//! ```rust
+//! use enum_extract::EnumExtract;
+//!
+//! #[derive(Debug, EnumExtract)]
+//! enum UnnamedVariants {
+//!     One(u32),
+//!     Two(u32, i32),
+//! }
+//!
+//! let mut unnamed = UnnamedVariants::One(1);
+//!
+//! // returns a reference to the value
+//! let one = unnamed.extract_as_one();
+//! assert_eq!(*one, 1);
+//!
+//! // returns a mutable reference to the value
+//! let one = unnamed.extract_as_one_mut();
+//! assert_eq!(*one, 1);
+//!
+//! // returns the value by consuming the enum
+//! let one = unnamed.extract_into_one();
+//! assert_eq!(one, 1);
+//! ```
+//!
+//! ```should_panic
+//! use enum_extract::EnumExtract;
+//!
+//! #[derive(Debug, EnumExtract)]
+//! enum UnnamedVariants {
+//!     One(u32),
+//!     Two(u32, i32),
+//! }
+//!
+//! let unnamed = UnnamedVariants::One(1);
+//!
+//! // panics with a decent message
+//! let one = unnamed.extract_as_two();
+//! ```
+//!
+//! ## Named Variants
+//!
+//! Check if the variant is the expected variant:
+//!
+//! ```rust
+//! use enum_extract::EnumExtract;
+//!
+//! #[derive(Debug, EnumExtract)]
+//! enum NamedVariants {
+//!     One {
+//!         first: u32
+//!     },
+//!     Two {
+//!         first: u32,
+//!         second: i32
+//!     },
+//! }
+//!
+//! let named = NamedVariants::One { first: 1 };
+//! assert!(named.is_one());
+//! assert!(!named.is_two());
+//! ```
+//!
+//! Get the variant's value:
+//!
+//! ```rust
+//! use enum_extract::EnumExtract;
+//!
+//! #[derive(Debug, EnumExtract)]
+//! enum NamedVariants {
+//!     One {
+//!         first: u32
+//!     },
+//!     Two {
+//!         first: u32,
+//!         second: i32
+//!     },
+//! }
+//!
+//! fn main() -> Result<(), enum_extract_error::EnumExtractError<NamedVariants>> {
+//!     let mut named = NamedVariants::One { first: 1 };
+//!
+//!     // returns a reference to the value
+//!     let one = named.as_one()?;
+//!     assert_eq!(*one, 1);
+//!
+//!     // returns a mutable reference to the value
+//!     let one = named.as_one_mut()?;
+//!     assert_eq!(*one, 1);
+//!
+//!     // returns the value by consuming the enum
+//!     let one = named.into_one()?;
+//!     assert_eq!(one, 1);
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! If the variant has multiple values, a tuple will be returned:
+//!
+//! ```rust
+//! use enum_extract::EnumExtract;
+//!
+//! #[derive(Debug, EnumExtract)]
+//! enum NamedVariants {
+//!     One {
+//!         first: u32
+//!     },
+//!     Two {
+//!         first: u32,
+//!         second: i32
+//!     },
+//! }
+//!
+//! fn main() -> Result<(), enum_extract_error::EnumExtractError<NamedVariants>> {
+//!     let mut unnamed = NamedVariants::Two { first: 1, second: 2 };
+//!
+//!     // returns a reference to the value
+//!     let two = unnamed.as_two()?;
+//!     assert_eq!(two, (&1, &2));
+//!
+//!     // returns a mutable reference to the value
+//!     let two = unnamed.as_two_mut()?;
+//!     assert_eq!(two, (&mut 1, &mut 2));
+//!
+//!     // returns the value by consuming the enum
+//!     let two = unnamed.into_two()?;
+//!     assert_eq!(two, (1, 2));
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! Extract variants of all of the above methods will panic with a decent message if the variant is not the expected variant.
+//! Very useful for testing, but not recommended for production code.
+//!
+//! See the [enum-extract-error](https://crates.io/crates/enum-extract-error) crate for more information on the error type.
+//!
+//! ```rust
+//! use enum_extract::EnumExtract;
+//!
+//! #[derive(Debug, EnumExtract)]
+//! enum NamedVariants {
+//!     One {
+//!         first: u32
+//!     },
+//!     Two {
+//!         first: u32,
+//!         second: i32
+//!     },
+//! }
+//!
+//! let mut named = NamedVariants::One { first: 1 };
+//!
+//! // returns a reference to the value
+//! let one = named.extract_as_one();
+//! assert_eq!(*one, 1);
+//!
+//! // returns a mutable reference to the value
+//! let one = named.extract_as_one_mut();
+//! assert_eq!(*one, 1);
+//!
+//! // returns the value by consuming the enum
+//! let one = named.extract_into_one();
+//! assert_eq!(one, 1);
+//! ```
+//!
+//! ```should_panic
+//! use enum_extract::EnumExtract;
+//!
+//! #[derive(Debug, EnumExtract)]
+//! enum NamedVariants {
+//!     One {
+//!         first: u32
+//!     },
+//!     Two {
+//!         first: u32,
+//!         second: i32
+//!     },
+//! }
+//!
+//! let named = NamedVariants::One { first: 1 };
+//!
+//! // panics with a decent message
+//! let one = named.extract_as_two();
+//! ```
+
+#![warn(missing_docs)]
+
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
 use syn::{parse_macro_input, DataEnum, DeriveInput};

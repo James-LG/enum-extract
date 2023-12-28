@@ -2,3 +2,13 @@
 
 members = ["crates/*"]
 resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+authors = ["James La Novara-Gsell <james.lanovara.gsell@gmail.com>"]
+edition = "2021"
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/James-LG/enum-extract"
+repository = "https://github.com/James-LG/enum-extract"
+categories = ["rust-patterns"]

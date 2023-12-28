@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use enum_extract::EnumExtract;
 
 pub mod name_collisions {
