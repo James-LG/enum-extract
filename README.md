@@ -2,10 +2,11 @@
 
 A deriving proc-macro that generates functions to the inner members of the enum.
 
-Based on [enum-as-inner](https://github.com/bluejekyll/enum-as-inner) with a few key differences:
+This is a heavily modified fork of [enum-as-inner](https://github.com/bluejekyll/enum-as-inner).
+Some of the key differences are listed below:
 
 1. `as_[variant]`, `into_[variant]` and `as_[variant]_mut` methods return a Result that can contain a concrete error type `EnumExtractError`.
-    - The error is returned when the actual variant does not match the expected variant, and the error contains both of these details for easier troubleshooting.
+    - The error is returned when the actual variant does not match the expected variant, and it contains both the name of the expected variant and the name of the actual variant for troubleshooting purposes.
     - The error also implements Display with a message of `expected {expected}, got {actual}`,
       so that you have a place to start troubleshooting rather than calling `unwrap` on an `Option`,
       or repeatedly writing better error messages by hand.

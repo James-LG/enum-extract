@@ -1,3 +1,11 @@
+// Copyright 2015-2018 Benjamin Fry <benjaminfry@me.com>
+// Copyright 2023 James La Novara-Gsell <james.lanovara.gsell@gmail.com>
+//
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
+
 //! Derive functions on an Enum for easily accessing individual items in the Enum.
 //! This crate is intended to be used with the [enum-extract-error](https://crates.io/crates/enum-extract-error) crate.
 //!
@@ -326,8 +334,7 @@ pub fn enum_extract(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     proc_macro::TokenStream::from(expanded)
 }
 
-/// returns first the types to return, the match names, and then tokens to the field accesses
-
+/// Returns an impl block for all of the enum's functions.
 fn impl_all_as_fns(enum_name: &Ident, generics: &syn::Generics, data: &DataEnum) -> TokenStream {
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
@@ -391,6 +398,7 @@ fn impl_all_as_fns(enum_name: &Ident, generics: &syn::Generics, data: &DataEnum)
     )
 }
 
+/// Returns the error type. ex: `EnumExtractError`
 fn get_error_type(err_name: &Ident, err_path: &syn::Path) -> syn::Type {
     let err_type = {
         let last_segment = syn::PathSegment::from(err_name.clone());
@@ -404,6 +412,7 @@ fn get_error_type(err_name: &Ident, err_path: &syn::Path) -> syn::Type {
     err_type
 }
 
+/// Returns the error type with generics. ex: `EnumExtractError<T>`
 fn get_error_type_with_generics(
     err_name: Ident,
     err_path: syn::Path,
