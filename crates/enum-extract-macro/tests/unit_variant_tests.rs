@@ -1,4 +1,4 @@
-use enum_extract::EnumExtract;
+use enum_extract_macro::EnumExtract;
 
 pub mod name_collisions {
     #![allow(dead_code, missing_copy_implementations, missing_docs)]

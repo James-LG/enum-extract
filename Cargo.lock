@@ -3,7 +3,14 @@
 version = 3
 
 [[package]]
-name = "enum-extract"
+name = "enum-extract-error"
+version = "0.1.0"
+dependencies = [
+ "thiserror",
+]
+
+[[package]]
+name = "enum-extract-macro"
 version = "0.1.0"
 dependencies = [
  "enum-extract-error",
@@ -11,13 +18,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "enum-extract-error"
-version = "0.1.0"
-dependencies = [
- "thiserror",
 ]
 
 [[package]]

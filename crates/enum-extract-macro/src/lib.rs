@@ -35,7 +35,7 @@
 //! Check if the variant is the expected variant:
 //!
 //! ```rust
-//! use enum_extract::EnumExtract;
+//! use enum_extract_macro::EnumExtract;
 //!
 //! #[derive(Debug, EnumExtract)]
 //! enum UnitVariants {
@@ -53,7 +53,7 @@
 //! Check if the variant is the expected variant:
 //!
 //! ```rust
-//! use enum_extract::EnumExtract;
+//! use enum_extract_macro::EnumExtract;
 //!
 //! #[derive(Debug, EnumExtract)]
 //! enum UnnamedVariants {
@@ -69,7 +69,7 @@
 //! Get the variant's value:
 //!
 //! ```rust
-//! use enum_extract::EnumExtract;
+//! use enum_extract_macro::EnumExtract;
 //!
 //! #[derive(Debug, EnumExtract)]
 //! enum UnnamedVariants {
@@ -99,7 +99,7 @@
 //! If the variant has multiple values, a tuple will be returned:
 //!
 //! ```rust
-//! use enum_extract::EnumExtract;
+//! use enum_extract_macro::EnumExtract;
 //!
 //! #[derive(Debug, EnumExtract)]
 //! enum UnnamedVariants {
@@ -132,7 +132,7 @@
 //! See the [enum-extract-error](https://crates.io/crates/enum-extract-error) crate for more information on the error type.
 //!
 //! ```rust
-//! use enum_extract::EnumExtract;
+//! use enum_extract_macro::EnumExtract;
 //!
 //! #[derive(Debug, EnumExtract)]
 //! enum UnnamedVariants {
@@ -156,7 +156,7 @@
 //! ```
 //!
 //! ```should_panic
-//! use enum_extract::EnumExtract;
+//! use enum_extract_macro::EnumExtract;
 //!
 //! #[derive(Debug, EnumExtract)]
 //! enum UnnamedVariants {
@@ -175,7 +175,7 @@
 //! Check if the variant is the expected variant:
 //!
 //! ```rust
-//! use enum_extract::EnumExtract;
+//! use enum_extract_macro::EnumExtract;
 //!
 //! #[derive(Debug, EnumExtract)]
 //! enum NamedVariants {
@@ -196,7 +196,7 @@
 //! Get the variant's value:
 //!
 //! ```rust
-//! use enum_extract::EnumExtract;
+//! use enum_extract_macro::EnumExtract;
 //!
 //! #[derive(Debug, EnumExtract)]
 //! enum NamedVariants {
@@ -231,7 +231,7 @@
 //! If the variant has multiple values, a tuple will be returned:
 //!
 //! ```rust
-//! use enum_extract::EnumExtract;
+//! use enum_extract_macro::EnumExtract;
 //!
 //! #[derive(Debug, EnumExtract)]
 //! enum NamedVariants {
@@ -269,7 +269,7 @@
 //! See the [enum-extract-error](https://crates.io/crates/enum-extract-error) crate for more information on the error type.
 //!
 //! ```rust
-//! use enum_extract::EnumExtract;
+//! use enum_extract_macro::EnumExtract;
 //!
 //! #[derive(Debug, EnumExtract)]
 //! enum NamedVariants {
@@ -298,7 +298,7 @@
 //! ```
 //!
 //! ```should_panic
-//! use enum_extract::EnumExtract;
+//! use enum_extract_macro::EnumExtract;
 //!
 //! #[derive(Debug, EnumExtract)]
 //! enum NamedVariants {
