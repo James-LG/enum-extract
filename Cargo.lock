@@ -4,14 +4,14 @@ version = 3
 
 [[package]]
 name = "enum-extract-error"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "thiserror",
 ]
 
 [[package]]
 name = "enum-extract-macro"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "enum-extract-error",
  "heck",

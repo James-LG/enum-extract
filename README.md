@@ -14,3 +14,35 @@ Some of the key differences are listed below:
    which panic if the actual variant does not match the expected variant.
     - These are very useful in tests where panicking is acceptable,
       especially when combined with the better error messages supported by the `EnumExtractError` struct.
+
+## Crates
+
+This project consists of two crates that should be used together.
+They are separate because crates the export procedural macros can _only_ export procedural macros.
+They should be treated as a single project,
+and will therefore be versioned in lock-step.
+
+### enum-extract-macro
+
+[![Dependency Status](https://deps.rs/repo/github/James-LG/enum-extract/status.svg?path=crates%2Fenum-extract-macro)](https://deps.rs/repo/github/James-LG/enum-extract?path=crates%2Fenum-extract-macro)
+[![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/James-LG/enum-extract/blob/master/LICENSE-MIT)
+[![License Apache 2.0](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](https://github.com/James-LG/enum-extract/blob/master/LICENSE-APACHE)
+[![Crates.io](https://img.shields.io/crates/v/enum-extract-macro.svg)](https://crates.io/crates/enum-extract-macro)
+[![doc.rs](https://docs.rs/enum-extract-macro/badge.svg)](https://docs.rs/enum-extract-macro)
+
+Provides the `EnumExtract` derive macro that can be used on enums to get `as_[variant]` functions for each variant,
+along with other useful functions.
+
+See the [documentation](https://docs.rs/enum-extract-macro) for examples and more details.
+
+### enum-extract-error
+
+[![Dependency Status](https://deps.rs/repo/github/James-LG/enum-extract/status.svg?path=crates%2Fenum-extract-error)](https://deps.rs/repo/github/James-LG/enum-extract?path=crates%2Fenum-extract-error)
+[![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/James-LG/enum-extract/blob/master/LICENSE-MIT)
+[![License Apache 2.0](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](https://github.com/James-LG/enum-extract/blob/master/LICENSE-APACHE)
+[![Crates.io](https://img.shields.io/crates/v/enum-extract-error.svg)](https://crates.io/crates/enum-extract-error)
+[![doc.rs](https://docs.rs/enum-extract-error/badge.svg)](https://docs.rs/enum-extract-error)
+
+Provides the `EnumExtractError` used as a return value for the `as_[variant]` functions.
+
+See the [documentation](https://docs.rs/enum-extract-error) for examples and more details.
